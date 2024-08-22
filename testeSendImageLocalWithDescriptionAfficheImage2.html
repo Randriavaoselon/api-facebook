@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Envoyer une image avec description sur Facebook</title>
+</head>
+<body>
+    <input type="file" id="imageInput" accept="image/*">
+    <br>
+    <img id="preview" src="" alt="Image Preview" style="display: none; max-width: 100%; height: auto; margin-top: 10px;">
+    <br>
+    <input type="text" id="descriptionInput" placeholder="Entrez une description">
+    <button id="postImageBtn">Envoyer l'image sur Facebook</button>
+
+    <script>
+        document.getElementById('imageInput').addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('preview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('postImageBtn').addEventListener('click', function() {
+            const imageInput = document.getElementById('imageInput');
+            const descriptionInput = document.getElementById('descriptionInput');
+            
+            if (imageInput.files.length === 0) {
+                alert('Veuillez sélectionner une image.');
+                return;
+            }
+
+            const file = imageInput.files[0];
+            const description = descriptionInput.value;
+
+            const formData = new FormData();
+            formData.append('source', file);
+            formData.append('caption', description);
+            formData.append('access_token', 'EAA1pz1mWHZBwBO4qxi1USZAdrsd5qQ8Kz5V6rCL2iJX56r1YFV2psxAIYK1MKBd30Mup5hVZBcOCIK6hymvWQVLD36LKRjGvFftf236SFdVpt4bTq1ZAJ0zwdH4w8A5aREB1dzDvof87Cv2YOsMfknfQx4jTqgI5mIjFN8RhEjgsBcvAlMKwvDmddgFZAIB5i');
+
+            const pageID = '408342759022757';
+
+            fetch(`https://graph.facebook.com/${pageID}/photos`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.id) {
+                    alert('Image envoyée avec succès sur Facebook!');
+                    // Vider les champs après succès
+                    imageInput.value = '';
+                    descriptionInput.value = '';
+                    document.getElementById('preview').style.display = 'none';
+                    document.getElementById('preview').src = '';
+                } else {
+                    alert('Erreur lors de l\'envoi de l\'image: ' + data.error.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+            });
+        });
+    </script>
+</body>
+</html>
